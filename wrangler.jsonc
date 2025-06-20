@@ -5,6 +5,7 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "f1predictor",
+	"main": "./index.js",
 	"account_id": "a7ebc3a58700e65c66af320bad6b4266",
 	"compatibility_date": "2025-06-20",
 	"compatibility_flags": [
