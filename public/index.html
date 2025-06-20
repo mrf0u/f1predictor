@@ -650,8 +650,8 @@
 		
 		function displayQualifyingResults(data) {
 			const resultDiv = document.getElementById('qualifyingResult');
-			let html = '<h3>🏁 Qualifying Prediction Results</h3><div class="prediction-content"><p><strong>Session Analysis:</strong></p><p>• Drivers: ' + data.practice_data_summary.total_drivers + '</p><p>• Total Laps: ' + data.practice_data_summary.total_laps + '</p><p>• Fastest Lap: ' + (data.practice_data_summary.fastest_lap ? data.practice_data_summary.fastest_lap.toFixed(3) : 'N/A') + 's</p><h4 style="margin-top: 1rem;">AI Prediction:</h4><div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">' + data.ai_prediction.raw_response.substring(0, 500) + '...</div>';
-			if (data.ai_prediction.structured_prediction && data.ai_prediction.structured_prediction.predicted_order && data.ai_prediction.structured_prediction.predicted_order.length > 0) {
+let raw = typeof data.ai_prediction.raw_response === "string" ? data.ai_prediction.raw_response : "";
+let html = '<h3>🏁 Qualifying Prediction Results</h3><div class="prediction-content"><p><strong>Session Analysis:</strong></p><p>• Drivers: ' + data.practice_data_summary.total_drivers + '</p><p>• Total Laps: ' + data.practice_data_summary.total_laps + '</p><p>• Fastest Lap: ' + (data.practice_data_summary.fastest_lap ? data.practice_data_summary.fastest_lap.toFixed(3) : 'N/A') + 's</p><h4 style="margin-top: 1rem;">AI Prediction:</h4><div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">' + raw.substring(0, 500) + '...</div>';			if (data.ai_prediction.structured_prediction && data.ai_prediction.structured_prediction.predicted_order && data.ai_prediction.structured_prediction.predicted_order.length > 0) {
 				html += '<h4 style="margin-top: 1rem;">Predicted Order:</h4><ul class="prediction-order">' + data.ai_prediction.structured_prediction.predicted_order.slice(0, 10).map(prediction => '<li>' + prediction + '</li>').join('') + '</ul>';
 			}
 			html += '</div>';

@@ -216,6 +216,7 @@ Predict the likely top 10 qualifying order (driver names only, comma-separated, 
 
   // 5. Try to parse the AI's response into a structured list
   let predicted_order = [];
+  let raw_response = typeof aiResult.result === "string" ? aiResult.result : JSON.stringify(aiResult);
   if (aiResult.result) {
     predicted_order = aiResult.result
       .replace(/\n/g, '')
@@ -228,7 +229,7 @@ Predict the likely top 10 qualifying order (driver names only, comma-separated, 
   return new Response(JSON.stringify({
     practice_data_summary: summary,
     ai_prediction: {
-      raw_response: aiResult.result,
+      raw_response,
       structured_prediction: {
         predicted_order
       }
@@ -289,8 +290,8 @@ Also, list up to 3 drivers who are likely to gain the most positions during the 
   // 5. Parse AI response for order and position gainers
   let predicted_race_order = [];
   let position_gainers = [];
+  let raw_response = typeof aiResult.result === "string" ? aiResult.result : JSON.stringify(aiResult);
   if (aiResult.result) {
-    // Try to extract "Position Gainers:" section if present
     const [orderPart, gainersPart] = aiResult.result.split(/Position Gainers:/i);
     predicted_race_order = orderPart
       .replace(/\n/g, '')
@@ -311,7 +312,7 @@ Also, list up to 3 drivers who are likely to gain the most positions during the 
   return new Response(JSON.stringify({
     qualifying_data_summary: summary,
     ai_prediction: {
-      raw_response: aiResult.result,
+      raw_response,
       structured_prediction: {
         predicted_race_order,
         position_gainers
