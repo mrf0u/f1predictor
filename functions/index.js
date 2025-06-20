@@ -83,15 +83,9 @@ export default {
 // --- Handler Functions ---
 
 async function handleGetAvailableYears(corsHeaders) {
-  // Fetch all sessions and extract unique years
-  const resp = await fetch('https://api.openf1.org/v1/sessions');
-  const sessions = await resp.json();
-  const years = new Set();
-  sessions.forEach(s => {
-    if (s.year) years.add(Number(s.year));
-  });
-  const available_years = Array.from(years).sort((a, b) => b - a);
   const current_year = new Date().getFullYear();
+  const available_years = [];
+  for (let y = 2021; y <= current_year; y++) available_years.push(y);
   return new Response(JSON.stringify({
     available_years,
     current_year
