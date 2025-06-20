@@ -5,13 +5,351 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>F1 AI Predictor</title>
     <style>
-        /* ...all your CSS from the backup file... */
-        /* For brevity, copy the entire <style> block from your backup here */
+		/* --- Begin F1 Predictor Styles --- */
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		
+		body {
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+			background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+			color: #ffffff;
+			min-height: 100vh;
+			overflow-x: hidden;
+		}
+		
+		.hero {
+			background: linear-gradient(135deg, #e10600 0%, #ff4444 50%, #e10600 100%);
+			padding: 2rem;
+			text-align: center;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.hero::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0,50 Q25,20 50,50 T100,50 L100,100 L0,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+			background-size: 200px 100px;
+			animation: wave 20s linear infinite;
+		}
+		
+		@keyframes wave {
+			0% { transform: translateX(0); }
+			100% { transform: translateX(-200px); }
+		}
+		
+		.hero h1 {
+			font-size: 3.5rem;
+			font-weight: 900;
+			margin-bottom: 0.5rem;
+			text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+			position: relative;
+		}
+		
+		.hero p {
+			font-size: 1.2rem;
+			opacity: 0.9;
+			position: relative;
+		}
+		
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 2rem;
+		}
+		
+		.season-selector {
+			background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+			border-radius: 15px;
+			padding: 1.5rem;
+			margin-bottom: 2rem;
+			box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+			border: 1px solid rgba(255,255,255,0.1);
+			text-align: center;
+		}
+		
+		.season-selector .form-group {
+			margin-bottom: 0;
+			max-width: 300px;
+			margin: 0 auto;
+		}
+		
+		.season-selector label {
+			font-size: 1.1rem;
+			font-weight: 700;
+			color: #e10600;
+			margin-bottom: 1rem;
+		}
+		
+		.grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 2rem;
+			margin-top: 2rem;
+		}
+		
+		@media (max-width: 768px) {
+			.grid {
+				grid-template-columns: 1fr;
+			}
+		}
+		
+		.card {
+			background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+			border-radius: 20px;
+			padding: 2rem;
+			box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+			border: 1px solid rgba(255,255,255,0.1);
+			transition: all 0.3s ease;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: linear-gradient(90deg, #e10600, #ff4444, #e10600);
+			transform: scaleX(0);
+			transition: transform 0.3s ease;
+		}
+		
+		.card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 30px 60px rgba(225,6,0,0.2);
+		}
+		
+		.card:hover::before {
+			transform: scaleX(1);
+		}
+		
+		.card h2 {
+			font-size: 1.8rem;
+			margin-bottom: 1.5rem;
+			color: #ffffff;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+		
+		.icon {
+			width: 24px;
+			height: 24px;
+			fill: #e10600;
+		}
+		
+		.form-group {
+			margin-bottom: 1.5rem;
+		}
+		
+		.form-group label {
+			display: block;
+			margin-bottom: 0.5rem;
+			font-weight: 600;
+			color: #cccccc;
+		}
+		
+		.select-container {
+			position: relative;
+		}
+		
+		select {
+			width: 100%;
+			padding: 12px 16px;
+			background: rgba(255,255,255,0.05);
+			border: 2px solid rgba(255,255,255,0.1);
+			border-radius: 12px;
+			color: #ffffff;
+			font-size: 1rem;
+			transition: all 0.3s ease;
+			appearance: none;
+			cursor: pointer;
+		}
+		
+		select:focus {
+			outline: none;
+			border-color: #e10600;
+			box-shadow: 0 0 0 3px rgba(225,6,0,0.2);
+		}
+		
+		select option {
+			background: #2a2a2a;
+			color: #ffffff;
+			padding: 8px;
+		}
+		
+		.select-container::after {
+			content: '▼';
+			position: absolute;
+			right: 16px;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #e10600;
+			pointer-events: none;
+			font-size: 12px;
+		}
+		
+		.button {
+			width: 100%;
+			padding: 16px;
+			background: linear-gradient(135deg, #e10600, #ff4444);
+			color: white;
+			border: none;
+			border-radius: 12px;
+			font-size: 1.1rem;
+			font-weight: 700;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.button::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.button:hover::before {
+			left: 100%;
+		}
+		
+		.button:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 10px 25px rgba(225,6,0,0.4);
+		}
+		
+		.button:disabled {
+			opacity: 0.6;
+			cursor: not-allowed;
+			transform: none;
+		}
+		
+		.loading {
+			display: none;
+			text-align: center;
+			margin: 1rem 0;
+		}
+		
+		.spinner {
+			display: inline-block;
+			width: 40px;
+			height: 40px;
+			border: 4px solid rgba(225,6,0,0.3);
+			border-radius: 50%;
+			border-top-color: #e10600;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+		
+		.result {
+			margin-top: 2rem;
+			padding: 1.5rem;
+			background: rgba(0,255,0,0.1);
+			border: 1px solid rgba(0,255,0,0.3);
+			border-radius: 12px;
+			display: none;
+		}
+		
+		.result.error {
+			background: rgba(255,0,0,0.1);
+			border-color: rgba(255,0,0,0.3);
+		}
+		
+		.result h3 {
+			margin-bottom: 1rem;
+			color: #00ff00;
+		}
+		
+		.result.error h3 {
+			color: #ff4444;
+		}
+		
+		.prediction-content {
+			background: rgba(255,255,255,0.05);
+			padding: 1rem;
+			border-radius: 8px;
+			margin-top: 1rem;
+		}
+		
+		.prediction-order {
+			list-style: none;
+			padding: 0;
+		}
+		
+		.prediction-order li {
+			padding: 0.5rem;
+			margin: 0.25rem 0;
+			background: rgba(255,255,255,0.05);
+			border-radius: 6px;
+			border-left: 3px solid #e10600;
+		}
+		
+		.session-info {
+			background: rgba(255,255,255,0.05);
+			padding: 1rem;
+			border-radius: 8px;
+			margin-bottom: 1rem;
+			font-size: 0.9rem;
+		}
+		
+		.api-status {
+			position: fixed;
+			top: 20px;
+			right: 20px;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-size: 0.8rem;
+			font-weight: 600;
+			z-index: 1000;
+		}
+		
+		.api-status.loading {
+			background: rgba(255,165,0,0.2);
+			border: 1px solid orange;
+			color: orange;
+		}
+		
+		.api-status.success {
+			background: rgba(0,255,0,0.2);
+			border: 1px solid green;
+			color: lightgreen;
+		}
+		
+		.api-status.error {
+			background: rgba(255,0,0,0.2);
+			border: 1px solid red;
+			color: lightcoral;
+		}
+		/* --- End F1 Predictor Styles --- */
     </style>
 </head>
 <body>
     <div class="hero">
-        <h1><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/F1_%28registered_trademark%29.svg/275px-F1_%28registered_trademark%29.svg.png" alt="F1" style="height: 60px; vertical-align: middle; margin-right: 15px;">AI Predictor</h1>
+        <h1>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/F1_%28registered_trademark%29.svg/275px-F1_%28registered_trademark%29.svg.png" alt="F1" style="height: 60px; vertical-align: middle; margin-right: 15px;">
+            AI Predictor
+        </h1>
         <p>Predict qualifying and race results using AI-powered analysis of F1 telemetry data</p>
     </div>
 
@@ -101,8 +439,263 @@
     <div class="api-status" id="apiStatus" style="display: none;"></div>
 
     <script>
-        // ...all your JS from the backup file...
-        // Copy the entire <script> block from your backup here
+		// ... Place this inside <script> ... in public/index.html
+		
+		const API_BASE = '';
+		let allSessions = [];
+		let currentSeason = new Date().getFullYear();
+		
+		document.addEventListener('DOMContentLoaded', function() {
+			loadAvailableYears();
+			setupEventListeners();
+		});
+		
+		async function loadAvailableYears() {
+			try {
+				showApiStatus('Loading available seasons...', 'loading');
+				const response = await fetch('/available-years');
+				const data = await response.json();
+				const seasonSelect = document.getElementById('seasonSelect');
+				seasonSelect.innerHTML = '';
+				data.available_years.forEach(year => {
+					const option = new Option(year, year);
+					if (year === data.current_year) {
+						option.selected = true;
+						currentSeason = year;
+					}
+					seasonSelect.add(option);
+				});
+				await loadSessions(currentSeason);
+				showApiStatus('Seasons loaded successfully', 'success');
+				setTimeout(() => hideApiStatus(), 2000);
+			} catch (error) {
+				console.error('Error loading seasons:', error);
+				showApiStatus('Failed to load seasons', 'error');
+			}
+		}
+		
+		async function loadSessions(year) {
+			try {
+				showApiStatus('Loading ' + year + ' F1 sessions...', 'loading');
+				const response = await fetch('/sessions?year=' + year);
+				const data = await response.json();
+				allSessions = data.weekends;
+				currentSeason = data.year;
+				populateSessionDropdowns();
+				showApiStatus(year + ' sessions loaded successfully', 'success');
+				setTimeout(() => hideApiStatus(), 2000);
+			} catch (error) {
+				console.error('Error loading sessions:', error);
+				showApiStatus('Failed to load sessions', 'error');
+			}
+		}
+		
+		function populateSessionDropdowns() {
+			const practiceSelect = document.getElementById('practiceSession');
+			const qualifyingSelect = document.getElementById('qualifyingSession');
+			practiceSelect.innerHTML = '<option value="">Select a practice session</option>';
+			qualifyingSelect.innerHTML = '<option value="">Select a qualifying session</option>';
+			allSessions.forEach(weekend => {
+				const practiceSessions = weekend.sessions.filter(session => session.session_type === 'Practice');
+				const qualifyingSessions = weekend.sessions.filter(session => session.session_type === 'Qualifying');
+				if (practiceSessions.length > 0) {
+					practiceSessions.forEach(session => {
+						const optionText = weekend.meeting_name + ' - ' + session.session_name + ' (' + formatDate(session.date_start) + ')';
+						const option = new Option(optionText, session.session_key);
+						option.dataset.weekend = JSON.stringify(weekend);
+						practiceSelect.add(option);
+					});
+				}
+				if (qualifyingSessions.length > 0) {
+					qualifyingSessions.forEach(session => {
+						const optionText = weekend.meeting_name + ' - ' + session.session_name + ' (' + formatDate(session.date_start) + ')';
+						const option = new Option(optionText, session.session_key);
+						option.dataset.weekend = JSON.stringify(weekend);
+						option.dataset.session = JSON.stringify(session);
+						qualifyingSelect.add(option);
+					});
+				}
+			});
+			updateButtonStates();
+		}
+		
+		function setupEventListeners() {
+			document.getElementById('seasonSelect').addEventListener('change', function() {
+				const selectedYear = this.value;
+				if (selectedYear) {
+					hideAllPredictions();
+					loadSessions(selectedYear);
+				}
+			});
+			document.getElementById('practiceSession').addEventListener('change', function() {
+				hidePrediction('qualifyingResult');
+				updatePracticeInfo();
+				updateButtonStates();
+			});
+			document.getElementById('predictQualifying').addEventListener('click', function() {
+				predictQualifying();
+			});
+			document.getElementById('qualifyingSession').addEventListener('change', function() {
+				hidePrediction('raceResult');
+				updateRaceInfo();
+				updateButtonStates();
+			});
+			document.getElementById('predictRace').addEventListener('click', function() {
+				predictRace();
+			});
+		}
+		
+		function hideAllPredictions() {
+			hidePrediction('qualifyingResult');
+			hidePrediction('raceResult');
+		}
+		
+		function hidePrediction(elementId) {
+			const element = document.getElementById(elementId);
+			if (element) {
+				element.style.display = 'none';
+			}
+		}
+		
+		function updatePracticeInfo() {
+			const select = document.getElementById('practiceSession');
+			const infoDiv = document.getElementById('practiceInfo');
+			const detailsSpan = document.getElementById('practiceDetails');
+			if (select.value) {
+				const weekend = JSON.parse(select.selectedOptions[0].dataset.weekend);
+				const session = weekend.sessions.find(s => s.session_key == select.value);
+				detailsSpan.innerHTML = '<strong>' + weekend.meeting_name + '</strong><br>' + weekend.country + ' - ' + weekend.location + '<br>Session: ' + session.session_name + '<br>Date: ' + formatDate(session.date_start);
+				infoDiv.style.display = 'block';
+			} else {
+				infoDiv.style.display = 'none';
+			}
+		}
+		
+		function updateRaceInfo() {
+			const qualifyingSelect = document.getElementById('qualifyingSession');
+			const infoDiv = document.getElementById('raceInfo');
+			const detailsDiv = document.getElementById('raceDetails');
+			if (qualifyingSelect.value) {
+				const weekend = JSON.parse(qualifyingSelect.selectedOptions[0].dataset.weekend);
+				const qualifyingSession = JSON.parse(qualifyingSelect.selectedOptions[0].dataset.session);
+				detailsDiv.innerHTML = '<strong>' + weekend.meeting_name + '</strong><br>' + weekend.country + ' - ' + weekend.location + '<br>Qualifying: ' + qualifyingSession.session_name + ' (' + formatDate(qualifyingSession.date_start) + ')';
+				infoDiv.style.display = 'block';
+			} else {
+				infoDiv.style.display = 'none';
+			}
+		}
+		
+		function updateButtonStates() {
+			const practiceSession = document.getElementById('practiceSession').value;
+			const qualifyingSession = document.getElementById('qualifyingSession').value;
+			document.getElementById('predictQualifying').disabled = !practiceSession;
+			document.getElementById('predictRace').disabled = !qualifyingSession;
+		}
+		
+		async function predictQualifying() {
+			const sessionKey = document.getElementById('practiceSession').value;
+			const loadingDiv = document.getElementById('qualifyingLoading');
+			const resultDiv = document.getElementById('qualifyingResult');
+			const button = document.getElementById('predictQualifying');
+			try {
+				loadingDiv.style.display = 'block';
+				resultDiv.style.display = 'none';
+				button.disabled = true;
+				showApiStatus('AI is analyzing practice data...', 'loading');
+				const response = await fetch('/predict-qualifying?session_key=' + sessionKey);
+				const data = await response.json();
+				if (data.error) {
+					throw new Error(data.message || data.error);
+				}
+				displayQualifyingResults(data);
+				showApiStatus('Qualifying prediction completed', 'success');
+			} catch (error) {
+				console.error('Error predicting qualifying:', error);
+				displayError(resultDiv, 'Failed to predict qualifying results: ' + error.message);
+				showApiStatus('Prediction failed', 'error');
+			} finally {
+				loadingDiv.style.display = 'none';
+				button.disabled = false;
+				setTimeout(() => hideApiStatus(), 3000);
+			}
+		}
+		
+		async function predictRace() {
+			const qualifyingKey = document.getElementById('qualifyingSession').value;
+			const loadingDiv = document.getElementById('raceLoading');
+			const resultDiv = document.getElementById('raceResult');
+			const button = document.getElementById('predictRace');
+			try {
+				loadingDiv.style.display = 'block';
+				resultDiv.style.display = 'none';
+				button.disabled = true;
+				showApiStatus('AI is analyzing qualifying data...', 'loading');
+				const response = await fetch('/predict-race?qualifying_key=' + qualifyingKey);
+				const data = await response.json();
+				if (data.error) {
+					throw new Error(data.message || data.error);
+				}
+				displayRaceResults(data);
+				showApiStatus('Race prediction completed', 'success');
+			} catch (error) {
+				console.error('Error predicting race:', error);
+				displayError(resultDiv, 'Failed to predict race results: ' + error.message);
+				showApiStatus('Prediction failed', 'error');
+			} finally {
+				loadingDiv.style.display = 'none';
+				button.disabled = false;
+				setTimeout(() => hideApiStatus(), 3000);
+			}
+		}
+		
+		function displayQualifyingResults(data) {
+			const resultDiv = document.getElementById('qualifyingResult');
+			let html = '<h3>🏁 Qualifying Prediction Results</h3><div class="prediction-content"><p><strong>Session Analysis:</strong></p><p>• Drivers: ' + data.practice_data_summary.total_drivers + '</p><p>• Total Laps: ' + data.practice_data_summary.total_laps + '</p><p>• Fastest Lap: ' + (data.practice_data_summary.fastest_lap ? data.practice_data_summary.fastest_lap.toFixed(3) : 'N/A') + 's</p><h4 style="margin-top: 1rem;">AI Prediction:</h4><div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">' + data.ai_prediction.raw_response.substring(0, 500) + '...</div>';
+			if (data.ai_prediction.structured_prediction && data.ai_prediction.structured_prediction.predicted_order && data.ai_prediction.structured_prediction.predicted_order.length > 0) {
+				html += '<h4 style="margin-top: 1rem;">Predicted Order:</h4><ul class="prediction-order">' + data.ai_prediction.structured_prediction.predicted_order.slice(0, 10).map(prediction => '<li>' + prediction + '</li>').join('') + '</ul>';
+			}
+			html += '</div>';
+			resultDiv.innerHTML = html;
+			resultDiv.className = 'result';
+			resultDiv.style.display = 'block';
+		}
+		
+		function displayRaceResults(data) {
+			const resultDiv = document.getElementById('raceResult');
+			let html = '<h3>🏆 Race Prediction Results</h3><div class="prediction-content"><p><strong>Qualifying Analysis:</strong></p><p>• Pole Position: ' + (data.qualifying_data_summary.pole_position ? data.qualifying_data_summary.pole_position.driver_name || 'Unknown' : 'Unknown') + ' (' + (data.qualifying_data_summary.pole_position ? data.qualifying_data_summary.pole_position.team || 'Unknown' : 'Unknown') + ')</p><p>• Qualifying Drivers: ' + data.qualifying_data_summary.total_drivers + '</p><p>• Fastest Lap: ' + (data.qualifying_data_summary.fastest_lap ? data.qualifying_data_summary.fastest_lap.toFixed(3) : 'N/A') + 's</p><h4 style="margin-top: 1rem;">AI Race Prediction:</h4><div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; margin-top: 0.5rem;">' + data.ai_prediction.raw_response.substring(0, 500) + '...</div>';
+			if (data.ai_prediction.structured_prediction && data.ai_prediction.structured_prediction.predicted_race_order && data.ai_prediction.structured_prediction.predicted_race_order.length > 0) {
+				html += '<h4 style="margin-top: 1rem;">Predicted Race Order:</h4><ul class="prediction-order">' + data.ai_prediction.structured_prediction.predicted_race_order.slice(0, 10).map(prediction => '<li>' + prediction + '</li>').join('') + '</ul>';
+			}
+			if (data.ai_prediction.structured_prediction && data.ai_prediction.structured_prediction.position_gainers && data.ai_prediction.structured_prediction.position_gainers.length > 0) {
+				html += '<h4 style="margin-top: 1rem;">Expected Position Gainers:</h4><ul class="prediction-order">' + data.ai_prediction.structured_prediction.position_gainers.map(gainer => '<li>' + gainer + '</li>').join('') + '</ul>';
+			}
+			html += '</div>';
+			resultDiv.innerHTML = html;
+			resultDiv.className = 'result';
+			resultDiv.style.display = 'block';
+		}
+		
+		function displayError(container, message) {
+			container.innerHTML = '<h3>❌ Error</h3><p>' + message + '</p>';
+			container.className = 'result error';
+			container.style.display = 'block';
+		}
+		
+		function showApiStatus(message, type) {
+			const statusDiv = document.getElementById('apiStatus');
+			statusDiv.textContent = message;
+			statusDiv.className = 'api-status ' + type;
+			statusDiv.style.display = 'block';
+		}
+		
+		function hideApiStatus() {
+			document.getElementById('apiStatus').style.display = 'none';
+		}
+		
+		function formatDate(dateString) {
+			const date = new Date(dateString);
+			return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+		}
     </script>
 </body>
 </html>
