@@ -172,39 +172,149 @@ async function handleTestAI(env, corsHeaders) {
 }
 
 async function handlePredictQualifying(sessionKey, ai, corsHeaders) {
-  // Placeholder: implement AI logic as needed
+  // 1. Fetch practice session lap data
+  const lapsResp = await fetch(`https://api.openf1.org/v1/lap_times?session_key=${sessionKey}`);
+  const laps = await lapsResp.json();
+
+  // 2. Summarize data for AI
+  const drivers = new Set();
+  let fastestLap = Infinity;
+  laps.forEach(lap => {
+    drivers.add(lap.driver_number);
+    if (lap.lap_time && lap.lap_time < fastestLap) fastestLap = lap.lap_time;
+  });
+
+  const summary = {
+    total_drivers: drivers.size,
+    total_laps: laps.length,
+    fastest_lap: isFinite(fastestLap) ? fastestLap : null
+  };
+
+  // 3. Prepare prompt for AI
+  const aiPrompt = `
+You are an F1 data expert. Given this practice session summary:
+- Total drivers: ${summary.total_drivers}
+- Total laps: ${summary.total_laps}
+- Fastest lap: ${summary.fastest_lap ? summary.fastest_lap.toFixed(3) : 'N/A'} seconds
+
+Predict the likely top 10 qualifying order (driver names only, comma-separated, most likely first):
+`;
+
+  // 4. Call Workers AI (Llama 3 8B Instruct)
+  let aiResult;
+  try {
+    aiResult = await ai.run("@cf/meta/llama-3-8b-instruct", {
+      prompt: aiPrompt,
+      max_tokens: 128
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "AI prediction failed", message: e.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 5. Try to parse the AI's response into a structured list
+  let predicted_order = [];
+  if (aiResult.result) {
+    predicted_order = aiResult.result
+      .replace(/\n/g, '')
+      .split(',')
+      .map(x => x.trim())
+      .filter(Boolean)
+      .slice(0, 10);
+  }
+
   return new Response(JSON.stringify({
-    practice_data_summary: {
-      total_drivers: 20,
-      total_laps: 100,
-      fastest_lap: 82.123
-    },
+    practice_data_summary: summary,
     ai_prediction: {
-      raw_response: "AI prediction for qualifying...",
+      raw_response: aiResult.result,
       structured_prediction: {
-        predicted_order: [
-          "Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Lando Norris", "Carlos Sainz"
-        ]
+        predicted_order
       }
     }
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
 async function handlePredictRace(qualifyingKey, ai, corsHeaders) {
-  // Placeholder: implement AI logic as needed
+  // 1. Fetch qualifying session lap data
+  const lapsResp = await fetch(`https://api.openf1.org/v1/lap_times?session_key=${qualifyingKey}`);
+  const laps = await lapsResp.json();
+
+  // 2. Summarize qualifying data
+  let polePosition = null;
+  let fastestLap = Infinity;
+  const drivers = new Set();
+  laps.forEach(lap => {
+    drivers.add(lap.driver_number);
+    if (lap.lap_time && lap.lap_time < fastestLap) {
+      fastestLap = lap.lap_time;
+      polePosition = lap;
+    }
+  });
+
+  const summary = {
+    pole_position: polePosition
+      ? { driver_name: polePosition.driver_name, team: polePosition.team_name }
+      : null,
+    total_drivers: drivers.size,
+    fastest_lap: isFinite(fastestLap) ? fastestLap : null
+  };
+
+  // 3. Prepare prompt for AI
+  const aiPrompt = `
+You are an F1 data expert. Given this qualifying session summary:
+- Pole position: ${summary.pole_position ? summary.pole_position.driver_name + " (" + summary.pole_position.team + ")" : "Unknown"}
+- Total drivers: ${summary.total_drivers}
+- Fastest lap: ${summary.fastest_lap ? summary.fastest_lap.toFixed(3) : 'N/A'} seconds
+
+Predict the likely top 10 race finishing order (driver names only, comma-separated, most likely first).
+Also, list up to 3 drivers who are likely to gain the most positions during the race (comma-separated, after "Position Gainers:").
+`;
+
+  // 4. Call Workers AI
+  let aiResult;
+  try {
+    aiResult = await ai.run("@cf/meta/llama-3-8b-instruct", {
+      prompt: aiPrompt,
+      max_tokens: 180
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "AI prediction failed", message: e.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  // 5. Parse AI response for order and position gainers
+  let predicted_race_order = [];
+  let position_gainers = [];
+  if (aiResult.result) {
+    // Try to extract "Position Gainers:" section if present
+    const [orderPart, gainersPart] = aiResult.result.split(/Position Gainers:/i);
+    predicted_race_order = orderPart
+      .replace(/\n/g, '')
+      .split(',')
+      .map(x => x.trim())
+      .filter(Boolean)
+      .slice(0, 10);
+    if (gainersPart) {
+      position_gainers = gainersPart
+        .replace(/\n/g, '')
+        .split(',')
+        .map(x => x.trim())
+        .filter(Boolean)
+        .slice(0, 3);
+    }
+  }
+
   return new Response(JSON.stringify({
-    qualifying_data_summary: {
-      pole_position: { driver_name: "Max Verstappen", team: "Red Bull" },
-      total_drivers: 20,
-      fastest_lap: 81.987
-    },
+    qualifying_data_summary: summary,
     ai_prediction: {
-      raw_response: "AI prediction for race...",
+      raw_response: aiResult.result,
       structured_prediction: {
-        predicted_race_order: [
-          "Max Verstappen", "Lewis Hamilton", "Charles Leclerc", "Lando Norris", "Carlos Sainz"
-        ],
-        position_gainers: ["Fernando Alonso", "Oscar Piastri"]
+        predicted_race_order,
+        position_gainers
       }
     }
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
