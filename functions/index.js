@@ -13,7 +13,7 @@ export default {
 		const url = new URL(request.url);
 		switch (url.pathname) {
 			case '/message':
-				return new Response('Hello, World!');
+				return new Response('Hello, World?');
 			case '/random':
 				return new Response(crypto.randomUUID());
 			default:
