@@ -25,7 +25,6 @@ export default {
 
     try {
       if (path === '/') {
-        // Serve static index.html via Wrangler's asset handler
         return env.ASSETS.fetch(request);
       } else if (path === '/available-years') {
         return await handleGetAvailableYears(corsHeaders);
@@ -84,36 +83,79 @@ export default {
 // --- Handler Functions ---
 
 async function handleGetAvailableYears(corsHeaders) {
-  // Example: Replace with real data source
-  const currentYear = new Date().getFullYear();
-  const available_years = [];
-  for (let y = 2021; y <= currentYear; y++) available_years.push(y);
+  // Fetch all sessions and extract unique years
+  const resp = await fetch('https://api.openf1.org/v1/sessions');
+  const sessions = await resp.json();
+  const years = new Set();
+  sessions.forEach(s => {
+    if (s.year) years.add(Number(s.year));
+  });
+  const available_years = Array.from(years).sort((a, b) => b - a);
+  const current_year = new Date().getFullYear();
   return new Response(JSON.stringify({
     available_years,
-    current_year: currentYear
+    current_year
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
 async function handleGetSessions(year, corsHeaders) {
-  // Example: Replace with real data source
-  // Return weekends and sessions for the given year
+  const selectedYear = year || new Date().getFullYear().toString();
+  const resp = await fetch(`https://api.openf1.org/v1/sessions?year=${selectedYear}`);
+  const sessions = await resp.json();
+  const weekends = {};
+
+  sessions.forEach(session => {
+    const meetingKey = session.meeting_key || `${session.country_name}_${session.date_start.split('T')[0]}`;
+    if (!weekends[meetingKey]) {
+      weekends[meetingKey] = {
+        meeting_key: session.meeting_key,
+        country: session.country_name,
+        location: session.location,
+        meeting_name: session.meeting_name || `${session.country_name} Grand Prix`,
+        year: session.year,
+        date_start: session.date_start,
+        sessions: []
+      };
+    }
+    weekends[meetingKey].sessions.push({
+      session_key: session.session_key,
+      session_name: session.session_name,
+      session_type: session.session_type,
+      date_start: session.date_start,
+      date_end: session.date_end
+    });
+  });
+
   return new Response(JSON.stringify({
-    year,
-    weekends: []
-  }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    year: parseInt(selectedYear),
+    total_sessions: sessions.length,
+    weekends: Object.values(weekends).sort((a, b) => new Date(a.date_start) - new Date(b.date_start))
+  }), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  });
 }
 
 async function handleGetSessionData(sessionKey, dataType, corsHeaders) {
-  // Example: Replace with real data source
+  // Example: fetch laps or telemetry for a session
+  let url;
+  if (dataType === 'laps') {
+    url = `https://api.openf1.org/v1/lap_times?session_key=${sessionKey}`;
+  } else if (dataType === 'telemetry') {
+    url = `https://api.openf1.org/v1/position?session_key=${sessionKey}`;
+  } else {
+    url = `https://api.openf1.org/v1/lap_times?session_key=${sessionKey}`;
+  }
+  const resp = await fetch(url);
+  const data = await resp.json();
   return new Response(JSON.stringify({
     session_key: sessionKey,
     type: dataType,
-    data: {}
+    data
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
 async function handleGetProcessedData(sessionKey, corsHeaders) {
-  // Example: Replace with real data source
+  // Placeholder: implement as needed
   return new Response(JSON.stringify({
     session_key: sessionKey,
     processed: {}
@@ -121,14 +163,14 @@ async function handleGetProcessedData(sessionKey, corsHeaders) {
 }
 
 async function handleGetCurrentWeekend(corsHeaders) {
-  // Example: Replace with real data source
+  // Placeholder: implement as needed
   return new Response(JSON.stringify({
     current_weekend: {}
   }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
 async function handleTestAI(env, corsHeaders) {
-  // Example: Replace with real AI integration
+  // Placeholder: implement as needed
   return new Response(JSON.stringify({
     test: true,
     message: "AI integration test successful"
@@ -136,7 +178,7 @@ async function handleTestAI(env, corsHeaders) {
 }
 
 async function handlePredictQualifying(sessionKey, ai, corsHeaders) {
-  // Example: Replace with real AI logic
+  // Placeholder: implement AI logic as needed
   return new Response(JSON.stringify({
     practice_data_summary: {
       total_drivers: 20,
@@ -155,7 +197,7 @@ async function handlePredictQualifying(sessionKey, ai, corsHeaders) {
 }
 
 async function handlePredictRace(qualifyingKey, ai, corsHeaders) {
-  // Example: Replace with real AI logic
+  // Placeholder: implement AI logic as needed
   return new Response(JSON.stringify({
     qualifying_data_summary: {
       pole_position: { driver_name: "Max Verstappen", team: "Red Bull" },
