@@ -1,32 +1,108 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
-	</head>
-	<body>
-		<h1 id="heading"></h1>
-		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
-		<button id="button" type="button">Fetch a random UUID</button>
-		<output id="random" for="button"></output>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 AI Predictor</title>
+    <style>
+        /* ...all your CSS from the backup file... */
+        /* For brevity, copy the entire <style> block from your backup here */
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/F1_%28registered_trademark%29.svg/275px-F1_%28registered_trademark%29.svg.png" alt="F1" style="height: 60px; vertical-align: middle; margin-right: 15px;">AI Predictor</h1>
+        <p>Predict qualifying and race results using AI-powered analysis of F1 telemetry data</p>
+    </div>
 
-			const button = document.getElementById("button");
-			button.addEventListener("click", () => {
-				fetch('/random')
-					.then((resp) => resp.text())
-					.then((text) => {
-						const random = document.getElementById('random');
-						random.textContent = text;
-					});
-			});
-		</script>
-	</body>
+    <div class="container">
+        <div class="season-selector">
+            <div class="form-group">
+                <label for="seasonSelect">Select Season:</label>
+                <div class="select-container">
+                    <select id="seasonSelect">
+                        <option value="">Loading seasons...</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    Qualifying Prediction
+                </h2>
+                
+                <div class="form-group">
+                    <label for="practiceSession">Select Practice Session:</label>
+                    <div class="select-container">
+                        <select id="practiceSession">
+                            <option value="">Select a season first</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="session-info" id="practiceInfo" style="display: none;">
+                    <strong>Session Details:</strong><br>
+                    <span id="practiceDetails"></span>
+                </div>
+
+                <button class="button" id="predictQualifying" disabled>
+                    Predict Qualifying Results
+                </button>
+
+                <div class="loading" id="qualifyingLoading">
+                    <div class="spinner"></div>
+                    <p>AI is analyzing practice data...</p>
+                </div>
+
+                <div class="result" id="qualifyingResult"></div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 3.5C14.8 3.4 14.6 3.3 14.4 3.3C14 3.3 13.6 3.5 13.3 3.8L9.8 7.3C9.4 7.7 9.4 8.4 9.8 8.8C10.2 9.2 10.9 9.2 11.3 8.8L13.5 6.6L15.5 7.8L10.9 12.4C10.7 12.6 10.6 12.8 10.6 13.1L10.1 16.3L7.1 14.2C6.8 14 6.4 14 6.1 14.2L2.5 16.8C2.1 17.1 2 17.6 2.3 18C2.6 18.4 3.1 18.5 3.5 18.2L6.6 16L11.6 19.2C12 19.4 12.5 19.3 12.8 18.9C13.1 18.5 13 18 12.6 17.7L10.4 16.1L10.8 13.9L15.2 9.5L17.9 10.2C18.4 10.3 18.9 10 19 9.5C19.1 9 18.8 8.5 18.3 8.4L15.2 7.5L17.2 8.5L21 9Z"/>
+                    </svg>
+                    Race Prediction
+                </h2>
+                
+                <div class="form-group">
+                    <label for="qualifyingSession">Select Qualifying Session:</label>
+                    <div class="select-container">
+                        <select id="qualifyingSession">
+                            <option value="">Select a season first</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="session-info" id="raceInfo" style="display: none;">
+                    <strong>Qualifying Session:</strong><br>
+                    <div id="raceDetails"></div>
+                </div>
+
+                <button class="button" id="predictRace" disabled>
+                    Predict Race Results
+                </button>
+
+                <div class="loading" id="raceLoading">
+                    <div class="spinner"></div>
+                    <p>AI is analyzing qualifying data...</p>
+                </div>
+
+                <div class="result" id="raceResult"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="api-status" id="apiStatus" style="display: none;"></div>
+
+    <script>
+        // ...all your JS from the backup file...
+        // Copy the entire <script> block from your backup here
+    </script>
+</body>
 </html>
